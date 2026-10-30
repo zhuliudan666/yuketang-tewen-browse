@@ -52,7 +52,7 @@ Windows 默认路径：`C:\Users\<你的用户名>\.workbuddy\skills\yuketang-te
 ### 方式 B：只当脚本用
 
 ```bash
-git clone https://github.com/<your-name>/yuketang-tewen-browse.git
+git clone https://github.com/zhuliudan666/yuketang-tewen-browse.git
 cd yuketang-tewen-browse
 node scripts/launch-edge.mjs
 ```
