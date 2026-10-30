@@ -39,7 +39,7 @@
 把本仓库克隆到技能目录：
 
 ```bash
-git clone https://github.com/<your-name>/yuketang-tewen-browse.git \
+git clone https://github.com/zhuliudan666/yuketang-tewen-browse.git \
   ~/.workbuddy/skills/yuketang-tewen-browse
 ```
 
