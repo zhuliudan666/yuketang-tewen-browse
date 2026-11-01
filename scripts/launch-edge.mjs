@@ -23,6 +23,29 @@ const PROFILE = process.env.PROFILE_DIR || path.join(process.cwd(), '.yb-profile
 const PORT = Number(process.env.PORT || 9222);
 const START_URL = process.env.START_URL || 'about:blank';
 
+// ---- 安全校验：防止 --user-data-dir 被污染 ----
+// 典型事故：路径含空格且被拼成 shell 字符串时，参数被按空白切分：
+//   --user-data-dir=D:\workbuddy data\xxx\.profile
+//   → profile 变成 D:\workbuddy（安装目录！）
+//   → 剩余 "data\xxx\.profile" 被当成 URL 打开，报 ERR_NAME_NOT_RESOLVED
+// 后果：安装目录里长出一整套 Chromium 档案目录，触发 WorkBuddy 的
+//      install-dir-guard，导致"无法安装必要的更新"弹窗。
+const resolvedProfile = path.resolve(PROFILE);
+if (resolvedProfile === path.parse(resolvedProfile).root) {
+  console.error(`[guard] PROFILE 不能是盘符根目录：${resolvedProfile}`);
+  process.exit(1);
+}
+if (fs.existsSync(path.join(resolvedProfile, 'WorkBuddy.exe')) ||
+    fs.existsSync(path.join(path.dirname(resolvedProfile), 'Uninstall WorkBuddy.exe'))) {
+  console.error(`[guard] PROFILE 落在应用安装目录内：${resolvedProfile}`);
+  console.error('[guard] 这会让 WorkBuddy 更新被 install-dir-guard 拦截，请改用工作区内的目录');
+  process.exit(1);
+}
+if (/\s/.test(PROFILE)) {
+  console.warn(`[guard] PROFILE 含空格：${PROFILE}`);
+  console.warn('[guard] 必须用参数数组 spawn（本脚本已如此），不要拼成 shell 字符串，否则路径会被截断');
+}
+
 const up = async () => {
   try { return (await fetch(`http://127.0.0.1:${PORT}/json/version`)).ok; } catch { return false; }
 };
